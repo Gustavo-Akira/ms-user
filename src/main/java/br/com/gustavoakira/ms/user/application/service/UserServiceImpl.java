@@ -6,9 +6,11 @@ import br.com.gustavoakira.ms.user.application.port.UserRepositoryPort;
 import br.com.gustavoakira.ms.user.application.port.UserServicePort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Service
 public class UserServiceImpl implements UserServicePort {
 
     @Autowired
