@@ -1,6 +1,8 @@
 package br.com.gustavoakira.ms.user.adapters.outbound.persistence;
 
+import br.com.gustavoakira.ms.core.events.AuthenticationRegistrationMessage;
 import br.com.gustavoakira.ms.user.adapters.outbound.persistence.entities.UserEntity;
+import br.com.gustavoakira.ms.user.adapters.outbound.producer.UserProducer;
 import br.com.gustavoakira.ms.user.application.domain.PageInformation;
 import br.com.gustavoakira.ms.user.application.domain.User;
 import br.com.gustavoakira.ms.user.application.port.UserRepositoryPort;
@@ -16,18 +18,23 @@ import java.util.UUID;
 @Service
 public class UserRepository implements UserRepositoryPort {
 
+    private final UserProducer producer;
+
     private final SpringDataUserRepository repository;
 
     private final ModelMapper mapper;
 
-    public UserRepository(SpringDataUserRepository repository, ModelMapper mapper) {
+    public UserRepository(SpringDataUserRepository repository, ModelMapper mapper, UserProducer producer) {
         this.repository = repository;
         this.mapper = mapper;
+        this.producer =producer;
     }
 
     @Override
     public User insert(User user) {
-        return mapper.map(repository.save(mapper.map(user, UserEntity.class)),User.class);
+        User user1 = mapper.map(repository.save(mapper.map(user, UserEntity.class)),User.class);
+        producer.produce(new AuthenticationRegistrationMessage(user.getEmail(), user.getPassword(),user1.getId()));
+        return user1;
     }
 
     @Override
